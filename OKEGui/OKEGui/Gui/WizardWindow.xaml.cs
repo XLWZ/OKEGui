@@ -5,12 +5,13 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Windows;
-using System.Windows.Forms;
+//using System.Windows.Forms;
 using OKEGui.Utils;
 using OKEGui.Model;
 using OKEGui.Worker;
 using OKEGui.Task;
 using Newtonsoft.Json;
+using Microsoft.Win32;
 
 namespace OKEGui
 {
@@ -134,7 +135,7 @@ namespace OKEGui
             OpenFileDialog ofd = new OpenFileDialog();
             ofd.Filter = "OKEGui 项目文件 (*.json)|*.json";
             var result = ofd.ShowDialog();
-            if (result == System.Windows.Forms.DialogResult.Cancel)
+            if (result == false)
             {
                 return;
             }
@@ -145,13 +146,13 @@ namespace OKEGui
 
         private void OpenInputFile_Click(object sender, RoutedEventArgs e)
         {
-            using (var ofd = new OpenFileDialog
+            OpenFileDialog ofd = new OpenFileDialog
             {
                 Multiselect = true,
                 Filter = "视频文件 (*.m2ts, *.mkv, *.mp4, *.m2v, *.vob)|*.m2ts;*.mkv;*.mp4;*.m2v;*.vob"
-            })
+            };
             {
-                if (ofd.ShowDialog() == System.Windows.Forms.DialogResult.Cancel)
+                if (ofd.ShowDialog() == false)
                 {
                     return;
                 }

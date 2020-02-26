@@ -8,7 +8,8 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
-using System.Windows.Forms;
+//using System.Windows.Forms;
+using System.Windows;
 using Newtonsoft.Json;
 // ReSharper disable UnusedMember.Global
 
@@ -103,9 +104,9 @@ namespace OKEGui.Utils
                 {
                     Logger.Info($"发现新版本v{remoteVersion}, 下载地址: {validAsset.browser_download_url}");
                     var dialogResult = MessageBox.Show(caption: Title,
-                        text: $"发现新版本v{remoteVersion}，是否现在下载",
-                        buttons: MessageBoxButtons.YesNo, icon: MessageBoxIcon.Asterisk);
-                    if (dialogResult != DialogResult.Yes) return;
+                        messageBoxText: $"发现新版本v{remoteVersion}，是否现在下载",
+                        button: MessageBoxButton.YesNo, icon: MessageBoxImage.Asterisk);
+                    if (dialogResult != MessageBoxResult.Yes) return;
                     var proc = new Process
                     {
                         StartInfo = { UseShellExecute = true, FileName = validAsset.browser_download_url }

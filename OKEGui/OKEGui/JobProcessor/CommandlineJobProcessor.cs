@@ -116,7 +116,7 @@ namespace OKEGui
             }
         }
 
-        public void stop()
+        public async void stop()
         {
             if (proc != null && !proc.HasExited) {
                 try {
@@ -126,7 +126,8 @@ namespace OKEGui
                     proc.Kill();
                     while (bWaitForExit) // wait until the process has terminated without locking the GUI
                     {
-                        System.Windows.Forms.Application.DoEvents();
+                        await System.Windows.Threading.Dispatcher.Yield();
+                        //System.Windows.Forms.Application.DoEvents();
                         System.Threading.Thread.Sleep(100);
                     }
                     proc.WaitForExit();
