@@ -22,6 +22,7 @@ namespace OKEGui.Worker
             window.BtnEmpty.IsEnabled = true;
             window.BtnMoveDown.IsEnabled = false;
             window.BtnMoveUp.IsEnabled = false;
+            window.BtnMoveTop.IsEnabled = false;
         }
 
         private void WorkerDoWork(object sender, DoWorkEventArgs e)
@@ -281,7 +282,8 @@ namespace OKEGui.Worker
                                 ChapterInfo chapterInfo = ChapterService.LoadChapter(task);
                                 if (chapterInfo != null)
                                 {
-                                    if (task.ChapterStatus == ChapterStatus.Maybe)
+                                    if (task.ChapterStatus == ChapterStatus.Maybe ||
+                                            task.ChapterStatus == ChapterStatus.MKV)
                                     {
                                         task.ChapterStatus = ChapterStatus.Added;
                                     }

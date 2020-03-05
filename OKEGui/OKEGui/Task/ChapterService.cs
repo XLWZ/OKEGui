@@ -5,6 +5,7 @@ using System.Text;
 using OKEGui.Utils;
 using TChapter.Chapters;
 using TChapter.Parsing;
+using MediaInfo;
 
 namespace OKEGui
 {
@@ -13,7 +14,9 @@ namespace OKEGui
         No,
         Yes,
         Added,
-        Maybe
+        Maybe,
+        MKV,
+        Warn
     };
 
     public class ChapterService
@@ -23,7 +26,8 @@ namespace OKEGui
         public static ChapterStatus UpdateChapterStatus(TaskDetail task)
         {
             return HasChapterFile(task) ? ChapterStatus.Yes :
-                HasBlurayStructure(task) ? ChapterStatus.Maybe : ChapterStatus.No;
+                HasBlurayStructure(task) ? ChapterStatus.Maybe :
+                HasMatroskaChapter(task) ? ChapterStatus.MKV : ChapterStatus.No;
         }
 
         private static bool HasChapterFile(TaskDetail task)
@@ -57,6 +61,31 @@ namespace OKEGui
             return playlist.GetFiles("*.mpls").Length > 0;
         }
 
+        private static bool HasMatroskaChapter(TaskDetail task)
+        {
+            FileInfo inputFile = new FileInfo(task.InputFile);
+            if (inputFile.Extension != ".mkv")
+            {
+                Logger.Warn($"{task.InputFile}不是Matroska文件。");
+                return false;
+            }
+            
+            MediaInfo.MediaInfo MI = new MediaInfo.MediaInfo();
+            MI.Open(inputFile.FullName);
+            MI.Option("Complete");
+            int.TryParse(MI.Get(StreamKind.General, 0, "MenuCount"), out var MenuCount);
+
+            if (MenuCount == 0)
+            {
+                Logger.Warn($"{task.InputFile}内不含有章节。");
+                MI?.Close();
+                return false;
+            }
+
+            MI?.Close();
+            return true;
+        }
+
         public static ChapterInfo LoadChapter(TaskDetail task)
         {
             FileInfo inputFile = new FileInfo(task.InputFile);
@@ -77,6 +106,12 @@ namespace OKEGui
                     chapterInfo = GetChapterFromMPLS(playlistDirectory.GetFiles("*.mpls"), inputFile);
                     break;
                 }
+                case ChapterStatus.MKV:
+                    {
+                        FileInfo mkvExtract = new FileInfo(".\\tools\\mkvtoolnix\\mkvextract.exe");
+                        chapterInfo = new MATROSKAParser(mkvExtract.FullName).Parse(inputFile.FullName).FirstOrDefault();
+                        break;
+                    }
                 default:
                     return null;
             }
@@ -89,6 +124,11 @@ namespace OKEGui
             if (chapterInfo.Chapters.Count > 1 ||
                 chapterInfo.Chapters.Count == 1 && chapterInfo.Chapters[0].Time.Ticks > 0)
             {
+                double lastChapterInMiliSec = chapterInfo.Chapters[chapterInfo.Chapters.Count - 1].Time.TotalMilliseconds;
+                if (task.LengthInMiliSec - lastChapterInMiliSec < 3003)
+                {
+                    task.ChapterStatus = ChapterStatus.Warn;
+                }
                 return chapterInfo;
             }
 
