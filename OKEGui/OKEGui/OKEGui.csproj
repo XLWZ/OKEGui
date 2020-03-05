@@ -4,6 +4,7 @@
     <OutputType>WinExe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <UseWPF>true</UseWPF>
+    <UseWindowsForms>true</UseWindowsForms>
     <ApplicationIcon>Gui\App.ico</ApplicationIcon>
     <Win32Resource />
     <Copyright>Copyright ©  2016</Copyright>
